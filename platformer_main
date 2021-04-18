@@ -1,0 +1,121 @@
+import pygame as pg
+
+RED = (255, 0, 0)
+WHITE = (255,255,255)
+BLACK = (0,0,0)
+
+FPS = 60
+WIDTH = 500
+HEIGHT = 500
+
+GRAVITY_TOUCH = HEIGHT - 50 - 50
+
+class Player(pg.sprite.Sprite):
+    def __init__(self, x, y, speed):
+        self.x = x
+        self.y = y
+        self.speed = speed
+
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.Surface((50, 50))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+    def go(self, speed_g):
+        self.speed = speed_g
+        self.rect.x += self.speed
+
+    def gravity(self):
+        if self.rect.y != GRAVITY_TOUCH:
+            self.rect.y += 5
+        else:
+            self.rect.y += 0    
+    def jump(self):
+        if player.rect.y == GRAVITY_TOUCH & player.rect.y < GRAVITY_TOUCH+100:
+            self.rect.y -= 150
+
+
+class Level(pg.sprite.Sprite):
+    def __init__(self, x, y, size_w, size_h):
+        self.x = x
+        self.y = y
+        self.size_w = size_w
+        self.size_h = size_h
+
+        pg.sprite.Sprite.__init__(self)
+        self.image = pg.Surface((size_w, size_h))
+        self.image.fill(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+#подготовка
+pg.init()
+screen = pg.display.set_mode((WIDTH, HEIGHT))
+clock = pg.time.Clock()
+all_sprites = pg.sprite.Group()
+
+#отрисовка объектов
+
+#  ИГРОК:
+player = Player(WIDTH/2, HEIGHT/2, 7)
+all_sprites.add(player)
+#  УРОВЕНЬ:
+level = Level(WIDTH/2, GRAVITY_TOUCH+75, WIDTH, 50)
+all_sprites.add(level)
+
+#переменные для движения
+move_right = False
+move_left = False
+is_jump = False
+
+while True:
+    pg.time.delay(FPS)
+    screen.fill(WHITE)
+    player.gravity()
+
+    for i in pg.event.get():
+        if i.type == pg.QUIT:
+            exit()
+
+        elif i.type == pg.KEYDOWN:
+            #----------
+            if i.key == pg.K_RIGHT:
+                move_right = True
+            #----------
+            elif i.key == pg.K_LEFT:
+                move_left = True
+            #----------
+            if i.key == pg.K_z:
+                is_jump = True
+
+        elif i.type == pg.KEYUP:
+            #----------
+            if i.key == pg.K_RIGHT:
+                move_right = False
+            #----------
+            elif i.key == pg.K_LEFT:
+                move_left = False
+            #---------
+            if i.key == pg.K_z:
+                is_jump = False
+
+
+    if move_left:
+        player.go(-7)
+    elif move_right:
+        player.go(7)
+    if is_jump:
+        #if player.rect.y == GRAVITY_TOUCH & player.rect.y < GRAVITY_TOUCH+100:
+            player.jump()
+
+
+    #BLITS      
+    screen.blit(player.image, player.rect)     
+    all_sprites.update()
+    all_sprites.draw(screen)
+    pg.display.flip()
+
+    pg.display.update()
+
+pg.quit()
